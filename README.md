@@ -1,4 +1,4 @@
-# Learning blockchain and cryptos
+# Data structures
 ## Hash List
 Compare source data hash list checksum with target data hash list checksum.
 
