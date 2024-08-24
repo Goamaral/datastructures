@@ -1,16 +1,26 @@
 # Data structures
 ## Hash List
-Compare source data hash list checksum with target data hash list checksum.
+Compare source data checksum with target data checksum.
 
 ## Merkel Tree
-Compare source data merkel tree root checksum with target data merkel tree root checksum.
+Compare source data checksum with target data root checksum.
 
 ## Skip List
 Find item in list using fast lanes to improve lookup performance.
 
+# Radix Tree / Radix Trie / Compact Prefix Trie
+Compactly store strings in a tree structure split in parts.
+Improve lookup performance when searching using a prefix our full word.
+Examples:
+- Get devices in an IP range
+- String index
+- Text search
+
 # TODO
-[] Add tests to skip_list
-[] Collect TODOS
+[] Implement TestHashList_Append
+[] Implement TestMerkleTree_Append
+[] Implement TestSkipList_New
+[] Add use case examples of each data structure
 [] Implement radix tree
 [] Implement hash table
 [] Implement trie
@@ -22,3 +32,4 @@ Find item in list using fast lanes to improve lookup performance.
 [] Implement heap
 [] Implement patricia tree
 [] Implement red-black tree
+[] Implement examples
