@@ -1,37 +1,31 @@
-package skplist
+package skip_list
 
 import "fmt"
 
-/* STRUCTS */
 /*
-	Example height 4, skips 2
-	1                 -              15
-	1     -     -     10       -     15
-	1 - - 4 - - 7 - - 10 -  -  13 -  15
-	1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+Example height 4, skips 2
+1                 -              15
+1     -     -     10       -     15
+1 - - 4 - - 7 - - 10 -  -  13 -  15
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 */
-type skplist struct {
+type List struct {
 	skips      int
 	height     int
 	levelRoots []*Node
 }
 
-/* PUBLIC */
-/*
-  height >= 1
-  skips >= 0
-*/
-func New(height int, skips int) *skplist {
-	list := skplist{skips: skips, height: height}
+// height >= 1
+// skips >= 0
+func New(height int, skips int) *List {
+	list := List{skips: skips, height: height}
 	list.levelRoots = make([]*Node, height)
 	return &list
 }
 
-/*
-  Insert new value, in order, at floor level.
-  Then update all upper levels.
-*/
-func (list *skplist) Insert(value int) {
+// Insert new value, in order, at floor level.
+// Then update all upper levels.
+func (list *List) Insert(value int) {
 	newNode := NewNode(value)
 	levelRoot := list.levelRoots[0]
 
@@ -54,11 +48,9 @@ func (list *skplist) Insert(value int) {
 	}
 }
 
-/*
-  Updates level nodes based on the previous level
-  Nodes are added/updated after n skiped or if the lowerLevelNode is the last
-*/
-func (list *skplist) updateLevel(level int) {
+// Updates level nodes based on the previous level
+// Nodes are added/updated after n skiped or if the lowerLevelNode is the last
+func (list *List) updateLevel(level int) {
 	lowerLevelNode := list.levelRoots[level-1]
 	levelNode := list.levelRoots[level]
 	prevLevelNode := list.levelRoots[level]
@@ -93,27 +85,21 @@ func (list *skplist) updateLevel(level int) {
 	}
 }
 
-/*
-  Search target value
-*/
-func (list *skplist) Search(value int) bool {
+// Search target value
+func (list *List) Search(value int) bool {
 	return list.search(value, list.levelRoots[list.height-1])
 }
 
-/*
-  Print nodes organized by level
-*/
-func (list *skplist) PrintLevels() {
+// Print nodes organized by level
+func (list *List) PrintLevels() {
 	for index := range list.levelRoots {
 		level := list.height - index - 1
 		list.PrintLevel(level)
 	}
 }
 
-/*
-  Print level nodes
-*/
-func (list *skplist) PrintLevel(level int) {
+// Print level nodes
+func (list *List) PrintLevel(level int) {
 	levelRoot := list.levelRoots[level]
 
 	fmt.Print("Level[", level, "] ")
@@ -123,10 +109,8 @@ func (list *skplist) PrintLevel(level int) {
 	fmt.Print("\n")
 }
 
-/*
-  Print level nodes from level root
-*/
-func (list *skplist) PrintLevelFromRoot(levelRoot *Node) {
+// Print level nodes from level root
+func (list *List) PrintLevelFromRoot(levelRoot *Node) {
 	fmt.Print("Level ")
 	for current := levelRoot; current != nil; current = current.Next {
 		fmt.Print(current.ToString(), " ")
@@ -134,12 +118,9 @@ func (list *skplist) PrintLevelFromRoot(levelRoot *Node) {
 	fmt.Print("\n")
 }
 
-/* PRIVATE */
-/*
-  Search target value from levelNode onwards
-  Recur to lower levels until floor level is reached
-*/
-func (list *skplist) search(value int, levelNode *Node) bool {
+// Search target value from levelNode onwards
+// Recur to lower levels until floor level is reached
+func (list *List) search(value int, levelNode *Node) bool {
 	// If the node does not exist or if the value is less than the first value
 	if levelNode == nil || value < levelNode.Value {
 		return false
@@ -157,4 +138,27 @@ func (list *skplist) search(value int, levelNode *Node) bool {
 			return list.search(value, prevLevelNode.Child)
 		}
 	}
+}
+
+/* NODE */
+type Node struct {
+	Value int
+	Next  *Node
+	Child *Node
+}
+
+func NewNode(value int) *Node {
+	newNode := &Node{Value: value}
+	return newNode
+}
+
+func (node *Node) Tail() *Node {
+	current := node
+	for ; current.Next != nil; current = current.Next {
+	}
+	return current
+}
+
+func (node *Node) ToString() string {
+	return fmt.Sprintf("%d", node.Value)
 }
