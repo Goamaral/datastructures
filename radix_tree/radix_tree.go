@@ -42,8 +42,12 @@ func (t *Tree) SearchNode(qry []byte, exact bool) *Node {
 	return t.Head.SearchNode(qry, exact)
 }
 
-// func (t *Tree) Delete(qry string) {
-// }
+func (t *Tree) Delete(qry []byte, exact bool) {
+	n := t.SearchNode(qry, exact)
+	if n != nil {
+		n.Delete()
+	}
+}
 
 func (n *Node) InsertNode(qry []byte) *Node {
 	for _, child := range n.Children {
@@ -100,6 +104,11 @@ func (n *Node) SearchNode(qry []byte, exact bool) *Node {
 	}
 
 	return nil
+}
+
+func (n *Node) Delete() {
+	n.Valid = false
+	n.Children = nil
 }
 
 func extractPrefix(a, b []byte) []byte {
