@@ -14,7 +14,7 @@ func New() Tree {
 	return Tree{}
 }
 
-func (t *Tree) Insert(qry []byte) *Node {
+func (t *Tree) InsertNode(qry []byte) *Node {
 	if t.Head == nil {
 		t.Head = &Node{}
 	}
@@ -24,10 +24,10 @@ func (t *Tree) Insert(qry []byte) *Node {
 		return t.Head
 	}
 
-	return t.Head.Insert(qry)
+	return t.Head.InsertNode(qry)
 }
 
-func (t *Tree) ExactSearch(qry []byte) *Node {
+func (t *Tree) SearchNode(qry []byte, exact bool) *Node {
 	if t.Head == nil {
 		return nil
 	}
@@ -39,47 +39,37 @@ func (t *Tree) ExactSearch(qry []byte) *Node {
 		return nil
 	}
 
-	return t.Head.ExactSearch(qry)
+	return t.Head.SearchNode(qry, exact)
 }
-
-// func (t *Tree) PrefixSearch(qry []byte) []*Node {
-// }
 
 // func (t *Tree) Delete(qry string) {
 // }
 
-func (n *Node) Insert(qry []byte) *Node {
+func (n *Node) InsertNode(qry []byte) *Node {
 	for _, child := range n.Children {
-		prefix := child.extractPrefix(qry)
+		prefix := extractPrefix(child.Prefix, qry)
 		if len(prefix) > 0 {
+			// Child prefix is a partial match -> create new node and invalidate child
+			if len(child.Prefix) > len(prefix) {
+				left := &Node{
+					Prefix:   make([]byte, len(child.Prefix)-len(prefix)),
+					Valid:    child.Valid,
+					Children: child.Children,
+				}
+				copy(left.Prefix, child.Prefix[len(prefix):])
+				child.Valid = false
+				child.Children = []*Node{left}
+				child.Prefix = prefix
+			}
+
+			// Qry is an exact match -> validate child
 			if len(prefix) == len(qry) {
 				child.Valid = true
 				return child
-
-			} else {
-				// Child prefix is bigger than prefix -> create new node and invalidate child
-				if len(child.Prefix) > len(prefix) {
-					left := &Node{
-						Prefix:   make([]byte, len(child.Prefix)-len(prefix)),
-						Valid:    child.Valid,
-						Children: child.Children,
-					}
-					copy(left.Prefix, child.Prefix[len(prefix):])
-					child.Valid = false
-					child.Children = []*Node{left}
-					child.Prefix = prefix
-				}
-
-				// Qry matches prefix -> qry is the child prefix
-				if len(prefix) == len(qry) {
-					child.Valid = true
-					return child
-
-					// Qry is bigger than prefix -> insert in child with prefix removed
-				} else {
-					return child.Insert(qry[len(prefix):])
-				}
 			}
+
+			// Qry is a partial match -> insert in child with prefix removed
+			return child.InsertNode(qry[len(prefix):])
 		}
 	}
 
@@ -88,33 +78,37 @@ func (n *Node) Insert(qry []byte) *Node {
 	return newNode
 }
 
-func (n *Node) ExactSearch(qry []byte) *Node {
+func (n *Node) SearchNode(qry []byte, exact bool) *Node {
 	for _, child := range n.Children {
-		prefix := child.extractPrefix(qry)
+		prefix := extractPrefix(child.Prefix, qry)
 		if len(prefix) > 0 {
-			if len(prefix) == len(qry) {
+			// Exact match
+			if len(child.Prefix) == len(qry) {
 				return child
-
-			} else {
-				if len(child.Prefix) == len(qry) {
-					return child
-				} else {
-					return child.ExactSearch(qry[len(prefix):])
-				}
 			}
+
+			// Partial match -> continue search
+			if len(child.Prefix) < len(qry) {
+				return child.SearchNode(qry[len(child.Prefix):], exact)
+			}
+
+			if exact {
+				return nil
+			}
+			return child
 		}
 	}
 
 	return nil
 }
 
-func (n Node) extractPrefix(qry []byte) []byte {
+func extractPrefix(a, b []byte) []byte {
 	var prefix []byte
-	for i := 0; i < min(len(n.Prefix), len(qry)); i++ {
-		if n.Prefix[i] != qry[i] {
+	for i := 0; i < min(len(a), len(b)); i++ {
+		if a[i] != b[i] {
 			break
 		}
-		prefix = append(prefix, n.Prefix[i])
+		prefix = append(prefix, a[i])
 	}
 	return prefix
 }

@@ -13,34 +13,34 @@ func TestRadixTree(t *testing.T) {
 	leafPrefixMap := map[string]string{}
 	testLeafNodePrefix := func() {
 		for key, leafPrefix := range leafPrefixMap {
-			n := tr.ExactSearch([]byte(key))
+			n := tr.SearchNode([]byte(key), true)
 			assert.True(t, n.Valid)
 			assert.EqualValues(t, n.Prefix, leafPrefix)
 		}
 	}
 
-	tr.Insert([]byte("slow"))
+	tr.InsertNode([]byte("slow"))
 	leafPrefixMap["slow"] = "slow"
 	testLeafNodePrefix()
 
-	tr.Insert([]byte("test"))
+	tr.InsertNode([]byte("test"))
 	leafPrefixMap["test"] = "test"
 	testLeafNodePrefix()
 
-	tr.Insert([]byte("tester"))
+	tr.InsertNode([]byte("tester"))
 	leafPrefixMap["tester"] = "er"
 	testLeafNodePrefix()
 
-	tr.Insert([]byte("team"))
+	tr.InsertNode([]byte("team"))
 	leafPrefixMap["test"] = "st"
 	leafPrefixMap["team"] = "am"
 	testLeafNodePrefix()
 
-	tr.Insert([]byte("testing"))
+	tr.InsertNode([]byte("testing"))
 	leafPrefixMap["testing"] = "ing"
 	testLeafNodePrefix()
 
-	tr.Insert([]byte("toast"))
+	tr.InsertNode([]byte("toast"))
 	leafPrefixMap["toast"] = "oast"
 	leafPrefixMap["test"] = "st"
 	leafPrefixMap["team"] = "am"
